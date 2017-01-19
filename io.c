@@ -59,6 +59,17 @@
 //*****************************************************************************
 extern uint32_t g_ui32SysClock;
 
+/* Extern unsigned data variables for sending */
+extern int32_t tempInteger, tempFraction;
+extern int32_t humidityInteger, humidityFraction;
+extern int32_t pressureInteger, pressureFraction;
+extern int32_t lightInteger, lightFraction;
+
+extern bool TempDataFlag;
+extern bool HumidityDataFlag;
+extern bool PressureDataFlag;
+extern bool LightDataFlag;
+
 //*****************************************************************************
 //
 // The current speed of the on-screen animation expressed as a percentage.
@@ -150,6 +161,20 @@ io_init(void)
     io_set_timer(g_ulAnimSpeed);
 }
 
+void io_send_data(char * pcBuf, int iBufLen)
+{
+	/* wait until every measurement is ready */
+
+	usnprintf(pcBuf, iBufLen, "{\"temperature\":%u.%u,\"humidity\":%u.%u,\"pressure\":%u.%u,\"light\":%u.%u}",
+																										tempInteger, tempFraction,
+																										humidityInteger, humidityFraction,
+																										pressureInteger, pressureFraction,
+																										lightInteger, lightFraction);
+	TempDataFlag == false;
+	HumidityDataFlag == false;
+	PressureDataFlag == false;
+	LightDataFlag == false;
+}
 //*****************************************************************************
 //
 // Set the status LED on or off.
@@ -185,7 +210,6 @@ io_get_ledstate(char * pcBuf, int iBufLen)
     }
 
 }
-
 //*****************************************************************************
 //
 // Return LED state as an integer, 1 on, 0 off.

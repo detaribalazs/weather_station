@@ -72,6 +72,43 @@ function toggle_led()
     }
 }
 
+function sendData()
+{
+    var req = false;
+
+    function sendingComplete()
+    {
+        if(req.readyState == 4)
+        {
+            if(req.status == 200)
+            {
+            	respObj = JSON.parse(req.responseText);
+                document.getElementById("data").innerHTML = "<div>" 
+                	+ "Temperature: " + respObj.temperature + " "
+                	+ "Humidity: " + respObj.humidity + " "
+                	+ "Pressure: " + respObj.pressure + " "
+                	+ "Light: " + respObj.light + " "
+                    + "</div>";
+            }
+        }
+    }
+
+    if(window.XMLHttpRequest)
+    {
+        req = new XMLHttpRequest();
+    }
+    else if(window.ActiveXObject)
+    {
+        req = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    if(req)
+    {
+        req.open("GET", "/cgi-bin/send_data?id" + Math.random(), true);
+        req.onreadystatechange = sendingComplete;
+        req.send(null);
+    }
+}
+
 function speedSet()
 {
     var req = false;

@@ -73,10 +73,27 @@ fs_open(const char *pcName)
         return(NULL);
     }
 
+
+    /* requested measurement data? */
+    if(ustrncmp(pcName, "/cgi-bin/send_data", 18) == 0)
+    {
+    	static char pcBuf[150];
+
+        //
+        // Get the state of the LED
+        //
+        io_send_data(pcBuf, 150);
+
+        psFile->data = pcBuf;
+        psFile->len = strlen(pcBuf);
+        psFile->index = psFile->len;
+        psFile->pextension = NULL;
+        return(psFile);
+    }
     //
     // Process request to toggle STATUS LED
     //
-    if(ustrncmp(pcName, "/cgi-bin/toggle_led", 19) == 0)
+    else if(ustrncmp(pcName, "/toggle_led", 11) == 0)
     {
         static char pcBuf[4];
 
@@ -100,7 +117,6 @@ fs_open(const char *pcName)
         //
         return(psFile);
     }
-
     //
     // Request for LED State?
     //

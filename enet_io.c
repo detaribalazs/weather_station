@@ -192,20 +192,20 @@ tISL29023 LightInst;
 //
 //*****************************************************************************
 // TMP 006
-volatile bool TempDataFlag;					/* Temperature measurement is ready */
+bool TempDataFlag;					/* Temperature measurement is ready */
 volatile uint_fast8_t TempStatus;			/* Status of TMP006 sensor, used to indicate errors */
 volatile bool TempMeasReady;				/* TMP006 sensor's DRDY interrupt sets this flag, if measurement is ready */
 
 //SHT21
-volatile bool HumidityDataFlag;				/* Humidity measurement is ready */
+bool HumidityDataFlag;				/* Humidity measurement is ready */
 volatile uint_fast8_t HumidityStatus;		/* Status of TMP006 sensor, used to indicate errors */
 
 //BMP180
-volatile bool PressureDataFlag;				/* Pressure measurement is ready */
+bool PressureDataFlag;				/* Pressure measurement is ready */
 volatile uint_fast8_t PressureStatus;		/* Status of TMP006 sensor, used to indicate errors */
 
 //ISL29023
-volatile bool LightDataFlag;				/* Light measurement is ready */
+bool LightDataFlag;				/* Light measurement is ready */
 volatile uint_fast8_t LightStatus;			/* Status of TMP006 sensor, used to indicate errors */
 volatile bool LightIntensityFlag;			/* Intensity flag is used for indicating the application, if intensity
 											 * is out of threshold */
@@ -381,6 +381,11 @@ uint32_t g_ui32IPAddress;
 //
 //*****************************************************************************
 uint32_t g_ui32SysClock;
+int32_t tempInteger, tempFraction;
+int32_t humidityInteger, humidityFraction;
+int32_t pressureInteger, pressureFraction;
+int32_t lightInteger, lightFraction;
+
 
 //*****************************************************************************
 //
@@ -840,10 +845,22 @@ SysTickIntHandler(void)
 		/* Increment counter for sensors */
 		if( !(SystickCounter % ((SYSTICKHZ * WS_REFRESH_PERIOD_MS)/1000) ) )
 		{
-		UARTprintf("Temperature: %d.%d,  Humidity: %d.%d,  Pressure: %d.%d, Light: %d.%d\n ", IntegerPart(TempAmbientMeas), FractionPart(TempAmbientMeas),
-	    																							  IntegerPart(HumidityMeas), 	FractionPart(HumidityMeas),
-	    																								  IntegerPart(PressureMeas), 	FractionPart(PressureMeas),
-	    																								  IntegerPart(LightMeas), 		FractionPart(LightMeas));
+		tempInteger = IntegerPart(TempAmbientMeas);
+		tempFraction = FractionPart(TempAmbientMeas);
+
+		humidityInteger = IntegerPart(HumidityMeas);
+		humidityFraction = FractionPart(HumidityMeas);
+
+		pressureInteger = IntegerPart(PressureMeas);
+		pressureFraction = FractionPart(PressureMeas);
+
+		lightInteger = IntegerPart(LightMeas);
+		lightFraction = FractionPart(LightMeas);
+
+		UARTprintf("Temperature: %d.%d,  Humidity: %d.%d,  Pressure: %d.%d, Light: %d.%d\n ", tempInteger, tempFraction,
+	    																					  humidityInteger, humidityFraction,
+	    																					  pressureInteger, pressureFraction,
+	    																					  lightInteger, lightFraction);
 			/* Clear data ready flags */
 			TempDataFlag = false;
 			HumidityDataFlag = false;
@@ -1221,12 +1238,12 @@ main(void)
     //
     while(1)
     {
-        while(!g_ulFlags)
-        {
-            //
-            // Do nothing.
-            //
-        }
+//        while(!g_ulFlags)
+//        {
+//            //
+//            // Do nothing.
+//            //
+//        }
 
 
         /* Run until every measurement data is ready */
@@ -1304,16 +1321,16 @@ main(void)
         }
 
 
-        //
-        // Clear the flag now that we have seen it.
-        //
-        HWREGBITW(&g_ulFlags, FLAG_TICK) = 0;
-
-        //
-        // Toggle the GPIO
-        //
-        MAP_GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_1,
-                (MAP_GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_1) ^
-                 GPIO_PIN_1));
+//        //
+//        // Clear the flag now that we have seen it.
+//        //
+//        HWREGBITW(&g_ulFlags, FLAG_TICK) = 0;
+//
+//        //
+//        // Toggle the GPIO
+//        //
+//        MAP_GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_1,
+//                (MAP_GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_1) ^
+//                 GPIO_PIN_1));
     }
 }

@@ -48,6 +48,7 @@ void io_get_ledstate(char *pcBuf, int iBufLen);
 void io_set_animation_speed_string(char *pcBuf);
 void io_get_animation_speed_string(char *pcBuf, int iBufLen);
 void io_set_animation_speed(unsigned long ulSpeedPercent);
+void io_send_data(char * pcBuf, int iBufLen);
 unsigned long io_get_animation_speed(void);
 int io_is_led_on(void);
 
