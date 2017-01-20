@@ -35,6 +35,7 @@
 #include "driverlib/rom.h"
 #include "utils/ustdlib.h"
 #include "io.h"
+#include "weather_station/weather_station.h"
 
 //*****************************************************************************
 //
@@ -170,10 +171,10 @@ void io_send_data(char * pcBuf, int iBufLen)
 																										humidityInteger, humidityFraction,
 																										pressureInteger, pressureFraction,
 																										lightInteger, lightFraction);
-	TempDataFlag == false;
-	HumidityDataFlag == false;
-	PressureDataFlag == false;
-	LightDataFlag == false;
+//	TempDataFlag == false;
+//	HumidityDataFlag == false;
+//	PressureDataFlag == false;
+//	LightDataFlag == false;
 }
 //*****************************************************************************
 //
