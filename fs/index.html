@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<!-- Copyright (c) 2013-2016 Texas Instruments Incorporated.  All rights reserved. -->
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <title>Weather Station</title>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <link rel="shortcut icon" type="image/x-icon" href="weather.ico"/>
+    <script src="javascript.js" language="JavaScript1.2" charset="utf-8"></script>
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <h1>
+      Temperature data refreshed every 1000 ms
+    </h1>
+    <form>
+      New refresh period: <input type="number" min="10" id="period" placeholder="Must be greater, than 10" required> ms
+      <input value="Submit" type="button" onclick="refreshPeriod()">
+    </form>
+    <table width="100%">
+    <tbody>
+      <tr>
+        <td allign="center">
+          <p id="temp_value"></p>
+          <svg id="temp" width="650" height="220"></svg>
+        </td>
+        <td>
+          <p id="humidity_value"></p>
+          <svg id="humidity" width="650" height="200"></svg>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <svg id="pressure" width="650" height="200"></svg>
+          <p id="pressure_value"></p>
+        </td>
+        <td>
+          <svg id="light" width="650" height="200"></svg>
+          <p id="light_value"></p>
+        </td>
+      </tr>
+    </tbody>
+    </table>
+    <script>
+      initialized = false;
+      initAnim();
+    </script>
+  </body>
+</html>

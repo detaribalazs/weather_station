@@ -1,76 +1,40 @@
-<!-- Copyright (c) 2013-2016 Texas Instruments Incorporated.  All rights reserved. -->
-
-window.onload = function()
-{
-    document.getElementById('about').onclick = loadAbout;
-    document.getElementById('overview').onclick = loadOverview;
-    document.getElementById('block').onclick = loadBlock;
-    document.getElementById('io_http').onclick = loadIOHttp;
-}
-
-function loadAbout()
-{
-    loadPage("about.htm");
-    return false;
-}
-
-function loadOverview()
-{
-    loadPage("overview.htm");
-    return false;
-}
-
-function loadBlock()
-{
-    loadPage("block.htm");
-    return false;
-}
-
-function loadIOHttp()
-{
-    loadPage("io_http.htm");
-    ledstateGet();
-    speedGet();
-    return false;
-}
-
-function SetFormDefaults()
-{
-    document.iocontrol.LEDOn.checked = ls;
-    document.iocontrol.speed_percent.value = sp;
-}
-
-function toggle_led()
-{
-    var req = false;
-
-    function ToggleComplete()
-    {
-        if(req.readyState == 4)
-        {
-            if(req.status == 200)
+function periodicData()
             {
-                document.getElementById("ledstate").innerHTML = "<div>" +
-                                                  req.responseText + "</div>";
-            }
-        }
-    }
+              respObj;
+              var req = false;
 
-    if(window.XMLHttpRequest)
-    {
-        req = new XMLHttpRequest();
-    }
-    else if(window.ActiveXObject)
-    {
-        req = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    if(req)
-    {
-        req.open("GET", "/cgi-bin/toggle_led?id" + Math.random(), true);
-        req.onreadystatechange = ToggleComplete;
-        req.send(null);
-    }
-}
+              function periodicComplete()
+              {
+                if(req.readyState == 4)
+                {
+                  if(req.status == 200)
+                  {
+                    respObj = JSON.parse(req.responseText);
+                    document.getElementById("periodic").innerHTML = "<div>" 
+                                            + "Temperature: " + respObj.temperature + " "
+                                            + "Humidity: " + respObj.humidity + " "
+                                            + "Pressure: " + respObj.pressure + " "
+                                            + "Light: " + respObj.light + " "
+                                            + "</div>";
+                  }
+                }
+              }
+
+              if(window.XMLHttpRequest)
+              {
+                  req = new XMLHttpRequest();
+              }
+              else if(window.ActiveXObject)
+              {
+                  req = new ActiveXObject("Microsoft.XMLHTTP");
+              }
+              if(req)
+              {
+                  req.open("GET", "/cgi-bin/send_data?id" + Math.random(), true);
+                  req.onreadystatechange = periodicComplete;
+                  req.send(null);
+              }
+            }
 
 function sendData()
 {
@@ -108,121 +72,195 @@ function sendData()
         req.send(null);
     }
 }
-
-function speedSet()
-{
-    var req = false;
-    var speed_txt = document.getElementById("speed_percent");
-    function speedComplete()
-    {
-        if(req.readyState == 4)
-        {
-            if(req.status == 200)
-            {
-                document.getElementById("current_speed").innerHTML =
-                                        "<div>" + req.responseText + "</div>";
-            }
-        }
+function initAnim(param){
+    console.log(param);
+    if(param == undefined){
+      /* set default refresh period to 1000 ms */
+      period = 5000;
     }
-    if(window.XMLHttpRequest)
-    {
-        req = new XMLHttpRequest();
+    else{
+      period = Number.parseInt(param);
+      console.log(period);
     }
-    else if(window.ActiveXObject)
-    {
-        req = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    if(req)
-    {
-        req.open("GET", "/cgi-bin/set_speed?percent=" + speed_txt.value +
-                        "&id" + Math.random(), true);
-        req.onreadystatechange = speedComplete;
-        req.send(null);
-    }
+    //if(initialized === false){
+        tempGraph = initGraph(80, "temp", period);
+        humidityGraph  = initGraph(80, "humidity", period);
+        pressureGraph = initGraph(80, "pressure", period);
+        lightGraph = initGraph(80, "light", period);
+    //    initialized = true;
+    //}
+    //else{
+    //    tempGraph = initGraph(80, "temp", period, [tempGraph.minY, tempGraph.maxY]);
+    //    humidityGraph  = initGraph(80, "humidity", period, [humidityGraph.minY, humidityGraph.maxY]);
+    //    pressureGraph = initGraph(80, "pressure", period, [pressureGraph.minY, pressureGraph.maxY]);
+    //    lightGraph = initGraph(80, "light", period, [lightGraph.minY, lightGraph.maxY]);
+    //}
 }
 
-function ledstateGet()
-{
-    var led = false;
-    function ledComplete()
-    {
-        if(led.readyState == 4)
-        {
-            if(led.status == 200)
-            {
-                document.getElementById("ledstate").innerHTML = "<div>" +
-                                                  led.responseText + "</div>";
-            }
-        }
-    }
-
-    if(window.XMLHttpRequest)
-    {
-        led = new XMLHttpRequest();
-    }
-        else if(window.ActiveXObject)
-    {
-        led = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    if(led)
-    {
-        led.open("GET", "/ledstate?id=" + Math.random(), true);
-        led.onreadystatechange = ledComplete;
-        led.send(null);
-    }
+function deInitAnim(){
+    d3.select("#temp_graph").remove();
+    d3.select("#humidity_graph").remove();
+    d3.select("#pressure_graph").remove();
+    d3.select("#light_graph").remove();
 }
 
-function speedGet()
+function refreshPeriod()
 {
-    var req = false;
-    function speedReturned()
-    {
-        if(req.readyState == 4)
-        {
-            if(req.status == 200)
-            {
-                document.getElementById("current_speed").innerHTML = "<div>" + req.responseText + "</div>";
-            }
-        }
-    }
+    var newPeriod = document.getElementById("period").value;
+    console.log(newPeriod);
+    deInitAnim();
+    initAnim(newPeriod);
 
-    if(window.XMLHttpRequest)
-    {
-        req = new XMLHttpRequest();
-    }
-        else if(window.ActiveXObject)
-    {
-        req = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    if(req)
-    {
-        req.open("GET", "/get_speed?id=" + Math.random(), true);
-        req.onreadystatechange = speedReturned;
-        req.send(null);
-    }
 }
 
-function loadPage(page)
-{
-    if(window.XMLHttpRequest)
-    {
-        xmlhttp = new XMLHttpRequest();
+/* arguments: 
+    - sampleNum - number of samples showed at once
+    - data - array of length 'sampleNum' containing the measurement data
+    - random - temporal variable for testing
+    - id - contains the ID of 
+*/
+
+function initGraph(sampleNum, id, period, yScale, data){
+    var n = sampleNum,
+        random = d3.randomNormal(0, .9);
+    if(data == undefined){
+        var data = d3.range(n).map(random);
     }
-    else
-    {
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    if(yScale == undefined){
+        var yScale = [-1, 1];
     }
 
-    xmlhttp.open("GET", page, true);
-    xmlhttp.setRequestHeader("Content-type",
-                             "application/x-www-form-urlencoded");
-    xmlhttp.send();
+    var graphId = id + "_graph";;
+    var id = "#" + id;
 
-    xmlhttp.onreadystatechange = function ()
-    {
-        if((xmlhttp.readyState == 4) && (xmlhttp.status == 200))
-        {
-            document.getElementById("content").innerHTML = xmlhttp.responseText;
-        }
+    var svg = d3.select(id),
+        margin = {top: 20, right: 20, bottom: 20, left: 40},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                           .attr("id", graphId);
+
+    var x = d3.scaleLinear()
+        .domain([0, n - 1])
+        .range([0, width]);
+
+    var y = d3.scaleLinear()
+        .domain(yScale)
+        .range([height, 0]);
+
+    var line = d3.line()
+        .x(function(d, i) { return x(i); })
+        .y(function(d, i) { return y(d); });
+
+    g.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
+    g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + y(0) + ")")
+        .call(d3.axisBottom(x));
+
+    g.append("g")
+        .attr("class", "axis axis--y")
+        .call(d3.axisLeft(y));
+
+    g.append("g")
+        .attr("clip-path", "url(#clip)")
+        .append("path")
+        .datum(data)
+    
+        .attr("class", "line")
+        .transition()
+        .duration(period)
+        .ease(d3.easeLinear)
+        .on("start", tick);
+
+        function tick() {
+
+            // Push a new data point onto the beginning.
+            var newData = random();
+            data.unshift(newData);
+            function checkScale(measurementGraph){
+                var changed = false;
+                if(newData > measurementGraph.maxY)
+                {
+                    measurementGraph.maxY = newData;
+                    changed = true;   
+                }
+                if(newData < measurementGraph.minY)
+                {
+                    measurementGraph.minY = newData;
+                    changed = true;
+                }
+                if(changed === true)
+                {
+                    function redrawGraph(measurementGraph, id, data){
+                        function clearGraph(id){   
+                            var graphId = id + "_graph";
+                            d3.select(graphId).remove();
+                        };
+
+                        var clearId = id.replace(/#/g,"");
+                        var newScale = [measurementGraph.minY, measurementGraph.maxY];
+                        clearGraph(id);
+                        initGraph(80, clearId, period, newScale, data);
+                    };
+                    redrawGraph(measurementGraph, id, data);
+                }
+            }
+            switch(id){
+            case "#temp":
+                document.getElementById("temp_value").innerHTML = "Temperature: " + newData;
+                checkScale(tempGraph);
+                break;
+            case "#humidity":
+                document.getElementById("humidity_value").innerHTML = "Humidity: " + newData;
+                checkScale(humidityGraph);
+                break;
+            case "#pressure":
+                document.getElementById("pressure_value").innerHTML = "Pressure: " + newData;
+                checkScale(pressureGraph);
+                break;
+            case "#light":
+                document.getElementById("light_value").innerHTML = "Light: " + newData;
+                checkScale(lightGraph);
+                break;
+            };
+            // Redraw the line.
+            d3.select(this)
+            .attr("d", line)
+            .attr("transform", null);
+
+            // Slide it to the right.
+            d3.active(this)
+            .attr("transform", "translate(" + x(+1) + ",0)")
+            .transition()
+            .on("start", tick);
+
+            // Pop the old data point off the back.
+            data.pop();
+        };
+        var retVal = {
+            minY: -1,
+            maxY: 1,
+            avg: 0 
+        };
+        return retVal;
+}
+
+function redrawGraph(measGraph, id, data){
+    
+    function clearGraph(id)
+    {   
+        var graphId = id + "_graph";
+        d3.select(graphId).remove();
     }
+
+    var clearId = id.replace(/#/g,"");
+    var newScale = [measGraph.minY, measGraph.maxY];
+    clearGraph(id);
+    initGraph(80, clearId, period, newScale, data);
 }

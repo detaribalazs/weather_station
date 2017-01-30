@@ -3,7 +3,7 @@
 /* Styling for the entire document. */
 body
 {
-    background-color: white;
+    background-color: lightgray;
     color: black;
     font-family: Ariel,Helvetica,sans-serif;
 }
@@ -101,4 +101,10 @@ body
 {
     border-bottom: 1px solid #ff0000;
     border-top: 1px solid #ff0000;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
 }
