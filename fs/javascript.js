@@ -1,40 +1,9 @@
-function periodicData()
-            {
-              respObj;
-              var req = false;
-
-              function periodicComplete()
-              {
-                if(req.readyState == 4)
-                {
-                  if(req.status == 200)
-                  {
-                    respObj = JSON.parse(req.responseText);
-                    document.getElementById("periodic").innerHTML = "<div>" 
-                                            + "Temperature: " + respObj.temperature + " "
-                                            + "Humidity: " + respObj.humidity + " "
-                                            + "Pressure: " + respObj.pressure + " "
-                                            + "Light: " + respObj.light + " "
-                                            + "</div>";
-                  }
-                }
-              }
-
-              if(window.XMLHttpRequest)
-              {
-                  req = new XMLHttpRequest();
-              }
-              else if(window.ActiveXObject)
-              {
-                  req = new ActiveXObject("Microsoft.XMLHTTP");
-              }
-              if(req)
-              {
-                  req.open("GET", "/cgi-bin/send_data?id" + Math.random(), true);
-                  req.onreadystatechange = periodicComplete;
-                  req.send(null);
-              }
-            }
+var respObj = {
+    temperature: 0,
+    humidity: 0,
+    pressure: 100000,
+    light: 0
+};
 
 function sendData()
 {
@@ -47,12 +16,6 @@ function sendData()
             if(req.status == 200)
             {
             	respObj = JSON.parse(req.responseText);
-                document.getElementById("data").innerHTML = "<div>" 
-                	+ "Temperature: " + respObj.temperature + " "
-                	+ "Humidity: " + respObj.humidity + " "
-                	+ "Pressure: " + respObj.pressure + " "
-                	+ "Light: " + respObj.light + " "
-                    + "</div>";
             }
         }
     }
@@ -72,29 +35,22 @@ function sendData()
         req.send(null);
     }
 }
+
 function initAnim(param){
     console.log(param);
     if(param == undefined){
       /* set default refresh period to 1000 ms */
-      period = 5000;
+      period = 1000;
     }
     else{
       period = Number.parseInt(param);
       console.log(period);
+
+      tempGraph = initGraph(80, "temp", period);
+      humidityGraph  = initGraph(80, "humidity", period);
+      pressureGraph = initGraph(80, "pressure", period);
+      lightGraph = initGraph(80, "light", period);
     }
-    //if(initialized === false){
-        tempGraph = initGraph(80, "temp", period);
-        humidityGraph  = initGraph(80, "humidity", period);
-        pressureGraph = initGraph(80, "pressure", period);
-        lightGraph = initGraph(80, "light", period);
-    //    initialized = true;
-    //}
-    //else{
-    //    tempGraph = initGraph(80, "temp", period, [tempGraph.minY, tempGraph.maxY]);
-    //    humidityGraph  = initGraph(80, "humidity", period, [humidityGraph.minY, humidityGraph.maxY]);
-    //    pressureGraph = initGraph(80, "pressure", period, [pressureGraph.minY, pressureGraph.maxY]);
-    //    lightGraph = initGraph(80, "light", period, [lightGraph.minY, lightGraph.maxY]);
-    //}
 }
 
 function deInitAnim(){
@@ -104,8 +60,7 @@ function deInitAnim(){
     d3.select("#light_graph").remove();
 }
 
-function refreshPeriod()
-{
+function refreshPeriod(){
     var newPeriod = document.getElementById("period").value;
     console.log(newPeriod);
     deInitAnim();
@@ -122,7 +77,7 @@ function refreshPeriod()
 
 function initGraph(sampleNum, id, period, yScale, data){
     var n = sampleNum,
-        random = d3.randomNormal(0, .9);
+        random = d3.randomNormal(0, 0);
     if(data == undefined){
         var data = d3.range(n).map(random);
     }
@@ -180,20 +135,16 @@ function initGraph(sampleNum, id, period, yScale, data){
 
         function tick() {
 
+            console.log("tick'd");
             // Push a new data point onto the beginning.
-            var newData = random();
-            data.unshift(newData);
             function checkScale(measurementGraph){
                 var changed = false;
-                if(newData > measurementGraph.maxY)
-                {
-                    measurementGraph.maxY = newData;
+                var actualMax = d3.max(data);
+                var actualMin = d3.min(data);
+                if( (actualMax != measurementGraph.maxY) || (actualMin != measurementGraph.minY)){
+                    measurementGraph.maxY = actualMax;
+                    measurementGraph.minY = actualMin;
                     changed = true;   
-                }
-                if(newData < measurementGraph.minY)
-                {
-                    measurementGraph.minY = newData;
-                    changed = true;
                 }
                 if(changed === true)
                 {
@@ -210,23 +161,40 @@ function initGraph(sampleNum, id, period, yScale, data){
                     };
                     redrawGraph(measurementGraph, id, data);
                 }
+                return changed;
             }
             switch(id){
             case "#temp":
+                var newData = respObj.temperature;
+                data.unshift(newData);
                 document.getElementById("temp_value").innerHTML = "Temperature: " + newData;
-                checkScale(tempGraph);
+                if(checkScale(tempGraph)){
+                    return;
+                }
                 break;
             case "#humidity":
+                var newData = respObj.humidity;
+                data.unshift(newData);
                 document.getElementById("humidity_value").innerHTML = "Humidity: " + newData;
-                checkScale(humidityGraph);
+                if(checkScale(humidityGraph)){
+                    return;
+                }
                 break;
             case "#pressure":
+                var newData = respObj.pressure;
+                data.unshift(newData);
                 document.getElementById("pressure_value").innerHTML = "Pressure: " + newData;
-                checkScale(pressureGraph);
+                if(checkScale(pressureGraph)){
+                    return;
+                }
                 break;
             case "#light":
+                var newData = respObj.light;
+                data.unshift(newData);
                 document.getElementById("light_value").innerHTML = "Light: " + newData;
-                checkScale(lightGraph);
+                if(checkScale(lightGraph)){
+                    return;
+                }
                 break;
             };
             // Redraw the line.
@@ -236,9 +204,9 @@ function initGraph(sampleNum, id, period, yScale, data){
 
             // Slide it to the right.
             d3.active(this)
-            .attr("transform", "translate(" + x(+1) + ",0)")
-            .transition()
-            .on("start", tick);
+              .attr("transform", "translate(" + x(+1) + ",0)")
+              .transition()
+              .on("start", tick);
 
             // Pop the old data point off the back.
             data.pop();
@@ -246,7 +214,6 @@ function initGraph(sampleNum, id, period, yScale, data){
         var retVal = {
             minY: -1,
             maxY: 1,
-            avg: 0 
         };
         return retVal;
 }

@@ -103,7 +103,7 @@
 #define SYSTICK_INT_PRIORITY    0x80		/* Systick INT priority is the highest */
 #define ETHERNET_INT_PRIORITY   0xC0		/* ETH priority */
 #define GPIOH_INT_PRIORITY		0xE0		/* Light threshold INT priority is the lowest */
-#define WS_REFRESH_PERIOD_MS	1000			/* Refreshing period of sensor data */
+#define WS_REFRESH_PERIOD_MS	50			/* Refreshing period of sensor data */
 
 //*****************************************************************************
 //

@@ -11,12 +11,13 @@
   </head>
   <body>
     <h1>
-      Temperature data refreshed every 1000 ms
+      Measured data will be refreshed every 1000 ms
     </h1>
     <form>
       New refresh period: <input type="number" min="10" id="period" placeholder="Must be greater, than 10" required> ms
       <input value="Submit" type="button" onclick="refreshPeriod()">
     </form>
+    <p id="test"></p>
     <table width="100%">
     <tbody>
       <tr>
@@ -42,8 +43,10 @@
     </tbody>
     </table>
     <script>
+
+      var sensorData = setInterval(sendData, 1000); 
       initialized = false;
-      initAnim();
+      initAnim(1000);
     </script>
   </body>
 </html>
